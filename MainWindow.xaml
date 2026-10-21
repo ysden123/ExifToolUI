@@ -13,10 +13,7 @@
                 <Separator/>
                 <MenuItem Header="Close" Click="MenuItem_Close_Click"/>
             </MenuItem>
-            <MenuItem Header="Tests">
-                <MenuItem Header="Test1" Click="MenuItem_Test1_Click"/>
-            </MenuItem>
         </Menu>
-        <ContentControl x:Name="CC"/>
+        <ContentControl x:Name="CC" Margin="5"/>
     </DockPanel>
 </Window>
