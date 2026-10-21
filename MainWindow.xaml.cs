@@ -1,13 +1,5 @@
-﻿using System.Text;
+﻿using System.Diagnostics;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace ExifToolUI
 {
@@ -34,28 +26,36 @@ namespace ExifToolUI
             Close();
         }
 
-        private async void MenuItem_Test1_Click(object sender, RoutedEventArgs e)
+        private void MenuItem_Test1_Click(object sender, RoutedEventArgs e)
         {
-            using (var exiftool = new SharpExifTool.ExifTool())
+            // Configure the process start information
+            var startInfo = new ProcessStartInfo
             {
-                try
-                {
-                    var metadataList = await exiftool.ExtractAllMetadataAsync(filename: "d:\\DaVinci Video Projects\\Музыкальная фантазия\\Звук\\Танец маленьких лебедей.mp3");
-                    var count = metadataList.Count;
-                    MessageBox.Show($"count={count}", "Info",  MessageBoxButton.OK, MessageBoxImage.Information);
+                FileName = "exiftool",             // The executable to run (e.g., cmd.exe, powershell.exe, or any custom app)
+                Arguments = "\"c:\\Users\\yuriy\\Downloads\\Classicals.de - Tchaikovsky - Swan Lake, Op. 20 - Act 1 - Introduction.mp3\"",        // Arguments to pass to the command
+                RedirectStandardOutput = true,    // Capture standard output
+                RedirectStandardError = true,     // Capture standard error (recommended)
+                UseShellExecute = false,          // Required to redirect I/O
+                CreateNoWindow = true             // Hides the console window
+            };
 
+            try
+            {
+                // Start the process
+                using var process = Process.Start(startInfo);
+                // Read the standard output and error streams
+                string output = process!.StandardOutput.ReadToEnd();
+                string error = process!.StandardError.ReadToEnd();
 
-                    for(int i =0; i < count && i < 3; i++)
-                    {
-                        var pair = metadataList.ElementAt(i);
-                        MessageBox.Show($"pair {i}: {pair.Key} = {pair.Value}", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
+                // Wait for the process to exit
+                process!.WaitForExit();
 
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                // Display results
+                MessageBox.Show($"Exit Code: {process.ExitCode}\n\nOutput:\n{output}\n\nError:\n{error}", "Process Result", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"An error occurred while executing the process:\n{ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);  
             }
         }
 

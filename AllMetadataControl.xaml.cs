@@ -1,16 +1,9 @@
 ﻿using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Diagnostics;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace ExifToolUI
 {
@@ -37,22 +30,23 @@ namespace ExifToolUI
                 FilePathText.Text = openFileDialog.FileName;
                 ExtractButton.IsEnabled = true;
             }
-
-
         }
 
         private async void ExtractButton_Click(object sender, RoutedEventArgs e)
         {
-            MetadataTextBox.Text = string.Empty;
-
-            var currentCursor = MetadataTextBox.Cursor;
-            MetadataTextBox.Cursor = Cursors.Wait;
+            var currentCursor = MetadataDataGrid.Cursor;
+            MetadataDataGrid.Cursor = Cursors.Wait;
             ExtractButton.IsEnabled = false;
+            MetadataDataGrid.ItemsSource = null;
 
             try
             {
-                var exifData = await ExtractExifDataAsync(FilePathText.Text);
-                MetadataTextBox.Text = exifData.ToString();
+                var exifToolResult = await ExtractExifDataAsync2(FilePathText.Text);
+                MetadataDataGrid.ItemsSource = exifToolResult.Tags;
+                if (!string.IsNullOrEmpty(exifToolResult.Error))
+                {
+                    MessageBox.Show($"Error: {exifToolResult.Error}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             catch (Exception ex)
             {
@@ -61,44 +55,72 @@ namespace ExifToolUI
 
             finally
             {
-                MetadataTextBox.Cursor = currentCursor;
-                ExtractButton.IsEnabled = FilePathText.Text.Length > 0 ? true : false;
+                MetadataDataGrid.Cursor = currentCursor;
+                ExtractButton.IsEnabled = FilePathText.Text.Length > 0;
             }
         }
 
-        private static async Task<StringBuilder> ExtractExifDataAsync(string? filePath)
+        private static async Task<ExifToolResult> ExtractExifDataAsync2(string? filePath)
         {
             return await Task.Run(async () =>
             {
-                var exiftool = new SharpExifTool.ExifTool();
-                StringBuilder exifData = new();
+                // Configure the process start information
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = "exiftool",          // The executable to run (e.g., cmd.exe, powershell.exe, or any custom app)
+                    Arguments = $"\"{filePath}\"",  // Arguments to pass to the command
+                    RedirectStandardOutput = true,  // Capture standard output
+                    RedirectStandardError = true,   // Capture standard error (recommended)
+                    UseShellExecute = false,        // Required to redirect I/O
+                    CreateNoWindow = true           // Hides the console window
+                };
+
                 try
                 {
-                    var metadataList = await exiftool.ExtractAllMetadataAsync(filename: filePath);
-                    var count = metadataList.Count;
-                    if (count == 0)
-                    {
-                        MessageBox.Show($"No metadata found for file: {filePath}", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
-                        return exifData;
-                    }
+                    // Start the process
+                    using var process = Process.Start(startInfo);
+                    // Read the standard output and error streams
+                    string output = process!.StandardOutput.ReadToEnd();
+                    string error = process!.StandardError.ReadToEnd();
 
-                    for (int i = 0; i < count; i++)
+                    // Wait for the process to exit
+                    process!.WaitForExit();
+
+                    using var reader = new StringReader(output);
+                    string? line;
+                    List<KeyValuePair<string, string>> tags = [];
+                    while ((line = reader.ReadLine()) != null)
                     {
-                        var pair = metadataList.ElementAt(i);
-                        exifData.AppendLine($"{pair.Key}: {pair.Value}");
+                        var parts = line.Split(":");
+                        if (parts.Length > 1)
+                        {
+                            var tag = parts[0].Trim();
+                            var value = parts[1].Trim();
+                            tags.Add(new KeyValuePair<string, string>(tag, value));
+                        }
                     }
+                    var lineCount = tags.Count;
+                    return new ExifToolResult(tags, error);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return new ExifToolResult([], ex.Message);
                 }
-                return exifData;
             });
         }
 
         private void FilePathTextChanged(object sender, TextChangedEventArgs e)
         {
-            ExtractButton.IsEnabled = FilePathText.Text.Length > 0 ? true : false;
+            ExtractButton.IsEnabled = FilePathText.Text.Length > 0;
+        }
+
+        private void MetadataDataGridRow_DoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is DataGridRow row && row.Item is KeyValuePair<string, string> tag)
+            {
+                Clipboard.SetText($"{tag.Key}: {tag.Value}");
+                MessageBox.Show($"Copied to clipboard:\n{tag.Key}: {tag.Value}", "Copied", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
     }
 }

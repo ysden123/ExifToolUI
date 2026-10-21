@@ -15,9 +15,17 @@
                     <Button x:Name="ChooseFileButton" Click="ChooseFileButton_Click" Margin="5,0,0,0">...</Button>
                     <Button x:Name="ExtractButton" Click="ExtractButton_Click" Margin="5,0,0,0" IsEnabled="False">Extract</Button>
                 </StackPanel>
-                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="5">
-                    <TextBox x:Name="MetadataTextBox" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto" Margin="5"/>
-                </ScrollViewer>
+                <DataGrid x:Name="MetadataDataGrid" AutoGenerateColumns="False" Margin="5" IsReadOnly="True" CanUserAddRows="False" CanUserDeleteRows="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Tag" Binding="{Binding Key}" />
+                        <DataGridTextColumn Header="Value" Binding="{Binding Value}" />
+                    </DataGrid.Columns>
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <EventSetter Event="MouseDoubleClick" Handler="MetadataDataGridRow_DoubleClick"/>
+                        </Style>
+                    </DataGrid.RowStyle>
+                </DataGrid>
             </DockPanel>
         </GroupBox>
     </DockPanel>

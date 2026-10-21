@@ -7,22 +7,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <AssemblyVersion>1.0.0</AssemblyVersion>
-    <!--<ApplicationIcon>YSFileTools.ico</ApplicationIcon>-->
+    <ApplicationIcon>ExifToolUI.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SharpExifTool" Version="13.32.0.1" />
-  </ItemGroup>
-
-  <!--
-  <ItemGroup>
-    <None Remove="YSFileTools.ico" />
+    <None Remove="ExifToolUI.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="YSFileTools.ico" />
+    <Content Include="ExifToolUI.ico" />
   </ItemGroup>
-  -->
   
   <ItemGroup>
     <Reference Include="common">

@@ -2,4 +2,4 @@
 UI shell for ExifTool utility
 
 
-See [SharpExifTool](https://github.com/junian/SharpExifTool)
+The ExifTool utility is used. The system path must include the path to the ExifTool executable. The utility can be downloaded from [https://exiftool.org/](https://exiftool.org/).
