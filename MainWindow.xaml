@@ -10,6 +10,7 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="Actions">
                 <MenuItem Header="All metadata" Click="MenuItem_AllMetadata_Click"/>
+                <MenuItem Header="Show on Google maps" Click="MenuItem_ShowOnGoogleMaps_Click"/>
                 <Separator/>
                 <MenuItem Header="Close" Click="MenuItem_Close_Click"/>
             </MenuItem>

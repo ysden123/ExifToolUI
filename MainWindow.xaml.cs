@@ -29,5 +29,10 @@ namespace ExifToolUI
         {
             CC.Content = new AllMetadataControl();
         }
+
+        private void MenuItem_ShowOnGoogleMaps_Click(object sender, RoutedEventArgs e)
+        {
+            CC.Content = new ShowOnGoogleMapsControl();
+        }
     }
 }
