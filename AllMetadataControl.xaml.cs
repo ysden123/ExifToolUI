@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 using System.Diagnostics;
 using System.IO;
 using System.Windows;
@@ -68,7 +68,7 @@ namespace ExifToolUI
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = "exiftool",          // The executable to run (e.g., cmd.exe, powershell.exe, or any custom app)
-                    Arguments = $"\"{filePath}\"",  // Arguments to pass to the command
+                    Arguments = $"-charset filename=utf8 -@ {Utils.WrtiteArguments(filePath!)}",  // Arguments to pass to the command
                     RedirectStandardOutput = true,  // Capture standard output
                     RedirectStandardError = true,   // Capture standard error (recommended)
                     UseShellExecute = false,        // Required to redirect I/O

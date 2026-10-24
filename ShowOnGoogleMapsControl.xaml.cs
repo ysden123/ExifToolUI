@@ -1,18 +1,8 @@
 ﻿using Microsoft.Win32;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace ExifToolUI
 {
@@ -85,7 +75,6 @@ namespace ExifToolUI
             {
                 ShowButton.IsEnabled = FilePathText.Text.Length > 0;
             }
-
         }
 
         private void FilePathTextChanged(object sender, TextChangedEventArgs e)
@@ -101,7 +90,7 @@ namespace ExifToolUI
                 var startInfo = new ProcessStartInfo
                 {
                     FileName = "exiftool",          // The executable to run (e.g., cmd.exe, powershell.exe, or any custom app)
-                    Arguments = $"-n -GPSLatitude -GPSLongitude \"{filePath}\"",  // Arguments to pass to the command
+                    Arguments = $"-n -GPSLatitude -GPSLongitude -charset filename=utf8 -@ {Utils.WrtiteArguments(filePath!)}",  // Arguments to pass to the command
                     RedirectStandardOutput = true,  // Capture standard output
                     RedirectStandardError = true,   // Capture standard error (recommended)
                     UseShellExecute = false,        // Required to redirect I/O
